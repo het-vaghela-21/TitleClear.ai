@@ -1,0 +1,23 @@
+{
+  "status": 200,
+  "message": "Success",
+  "data": {
+    "findoc": {
+      "note": "Trimmed for the fixture — financial statements (balance sheet, P&L, cash flow), not read by this connector."
+    },
+    "projectdoc": {
+      "titleReportId": 5594242,
+      "titleReportUId": "P2BPiDWn86g0h92a1uq0SPqqXu8zMbkiBlzKhhugMuzDkrBG29gWA7X8HMbzd1lg2lBJhhCgAe",
+      "titleReportIssueDate": "2025-07-21T00:00:00.000+0530",
+      "titleReportIssuerName": "MUKESHKUMAR N KAPURIYA",
+      "titleClearanceCertificateId": 5594243,
+      "titleClearanceCertificateUId": "33CPBbWMA6AEhrraV7qU3PVqXu8zMOkDolBJhbtgL5zGkrBa2e9WSHXAZM8zd1lg2lBJAhjoA7",
+      "titleClearanceCertificateIssuanceDate": "2025-07-21T00:00:00.000+0530",
+      "titleClearanceCertificateIssuerName": "MUKESHKUMAR N KAPURIYA",
+      "encumbranceCertificateDocId": 5594237,
+      "encumbranceCertificateDocUId": "43aPACWm86gihqraV7qURPpUXgazddk8FlPKhhJgyvzEhr8a2e9WS7X8XMrHdiggEBBSzhkoA7",
+      "encumbranceCertificateDocIssuanceDate": "2025-07-21T00:00:00.000+0530",
+      "encumbranceCertificateDocIssuerName": "MUKESHKUMAR N KAPURIYA"
+    }
+  }
+}

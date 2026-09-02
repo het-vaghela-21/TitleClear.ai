@@ -1,0 +1,17 @@
+{
+  "id": "synthetic-000",
+  "docType": "7/12 Extract",
+  "fields": {
+    "docType": "7/12 Extract",
+    "ownerName": "Ramesh Patel",
+    "surveyNo": "100/1",
+    "khataNo": "2000",
+    "village": "Kalol",
+    "district": "Gandhinagar",
+    "areaValue": 0.5,
+    "areaUnit": "acre",
+    "transactionDate": "2015-01-01",
+    "transactionType": "Sale Deed"
+  },
+  "referenceText": "હક્ક પત્રક (૭/૧૨ ઉતારો)\nRecord of Rights (7/12 Extract)\nદસ્તાવેજનો પ્રકાર\n(Document Type)\nDocument Type : 7/12 Extract\nમાલિકનું નામ\n(Owner Name)\nOwner Name : Ramesh Patel / રમેશભાઈ પટેલ\nસર્વે નંબર\n(Survey No)\nSurvey No : 100/1\nખાતા નંબર\n(Khata No)\nKhata No : 2000\nગામ\n(Village)\nVillage : Kalol\nજિલ્લો\n(District)\nDistrict : Gandhinagar\nક્ષેત્રફળ\n(Area)\nArea : 0.50 acre\nતારીખ\n(Date)\nDate : 01-01-2015\nવ્યવહારનો પ્રકાર\n(Transaction Type)\nTransaction Type : Sale Deed"
+}

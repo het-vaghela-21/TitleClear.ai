@@ -1,0 +1,17 @@
+{
+  "id": "synthetic-001",
+  "docType": "Index-2",
+  "fields": {
+    "docType": "Index-2",
+    "ownerName": "Suresh Shah",
+    "surveyNo": "101/2",
+    "khataNo": "2001",
+    "village": "Bavla",
+    "district": "Mehsana",
+    "areaValue": 0.75,
+    "areaUnit": "guntha",
+    "transactionDate": "2016-02-02",
+    "transactionType": "Gift Deed"
+  },
+  "referenceText": "ઈન્ડેક્સ-૨ નોંધણી ઉતારો\nIndex-2 Registration Extract\nદસ્તાવેજનો પ્રકાર\n(Document Type)\nDocument Type : Index-2\nમાલિકનું નામ\n(Owner Name)\nOwner Name : Suresh Shah / સુરેશભાઈ શાહ\nસર્વે નંબર\n(Survey No)\nSurvey No : 101/2\nખાતા નંબર\n(Khata No)\nKhata No : 2001\nગામ\n(Village)\nVillage : Bavla\nજિલ્લો\n(District)\nDistrict : Mehsana\nક્ષેત્રફળ\n(Area)\nArea : 0.75 guntha\nતારીખ\n(Date)\nDate : 02-02-2016\nવ્યવહારનો પ્રકાર\n(Transaction Type)\nTransaction Type : Gift Deed"
+}

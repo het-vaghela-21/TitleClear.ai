@@ -32,6 +32,19 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# gujrera trial connector — local response cache and scratch research files
+src/lib/connectors/gujrera/__cache__/
+.tmp-gujrera-research/
+
+# internal research notes — not for the public repo
+/research/
+
+# tesseract.js traineddata cache (downloaded on first OCR run; lands in cwd
+# unless TESSERACT_LANG_PATH is set)
+src/lib/ocr/.tesseract-cache/
+/*.traineddata
 
 # vercel
 .vercel
@@ -39,3 +52,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# document library — files uploaded at /documents/library (see
+# src/lib/doc-library/README.md). Override the location with DOC_LIBRARY_DIR.
+/storage/

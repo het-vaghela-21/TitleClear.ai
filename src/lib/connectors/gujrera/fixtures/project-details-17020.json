@@ -1,0 +1,25 @@
+{
+  "status": 200,
+  "message": "Success",
+  "data": {
+    "projectDetail": {
+      "id": 13419,
+      "prjRegId": 17020,
+      "projectName": "AALEKH BUNGALOWS - A",
+      "projectType": "Plotted Development",
+      "startDate": "2022-07-13T00:00:00.000+0530",
+      "completionDate": "2028-12-31T00:00:00.000+0530",
+      "projectStatus": "New",
+      "projectDesc": "RESIDENTIAL PLOTS ",
+      "projectAddress": "T.P. 73, BLOCK NO. 63, F.P. 37, REVENUE SURVEY NO. 63,",
+      "projectAddress2": "NEAR SHIVALIK HEIGHTS, UTRAN, SURAT",
+      "stateCode": "GJ",
+      "stateName": "GUJARAT",
+      "distCode": "SURAT",
+      "distName": "Surat",
+      "subDistCode": "Surat City",
+      "subDistName": "Surat City",
+      "pinCode": "394105"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "status": 200,
+  "message": "Success",
+  "data": {
+    "altcertificateId": null,
+    "altsec15certificateId": null,
+    "projectAckNo": "PR/SURAT/SURAT CITY/GUJRERA/231101/015586",
+    "promoterType": "PARTNERSHIP FIRM",
+    "projRegNo": "PR/GJ/SURAT/SURAT CITY/SUDA/PAA12907/120224/311228",
+    "wfoId": "16973",
+    "promoterEmailId": "aalekhenterprise.utran@gmail.com",
+    "formOneId": 271761,
+    "formTwoId": 151114,
+    "altcertificateUid": null,
+    "certificateId": 5624137,
+    "projectType": "Plotted Development",
+    "certificateUid": "P6DPCcWfL6ejh3raV9qWSPq8Xa8zMpkmPlCBhcIgLwzyo8qfHzsbsHZ89Mxzd3eiCtBQhCKhLkA0o939DYsWsS",
+    "extcertificateId": null,
+    "projRegId": 17020,
+    "promoterId": 16100,
+    "promoterMobileNo": "9825142157",
+    "approvedDate": "12-02-2024",
+    "promoterName": "AALEKH ENTERPRISE",
+    "appSubmissionDate": "2023-10-26T18:14:35.000+0530",
+    "altsec15certificateUid": null,
+    "extcertificateUid": null,
+    "projectName": "AALEKH BUNGALOWS - A",
+    "formThreeId": 411217
+  }
+}
