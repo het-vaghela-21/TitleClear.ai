@@ -1,0 +1,1488 @@
+<title>TitleClear Module Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Gujarati:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --bg:          #ECEFE9;
+    --surface:     #F6F8F3;
+    --surface-2:   #E2E7DD;
+    --ink:         #171E19;
+    --ink-2:       #4E5A51;
+    --ink-3:       #78847B;
+    --rule:        #CBD2C6;
+    --rule-strong: #ABB5A6;
+    --accent:      #4B3E8E;
+    --accent-ink:  #4B3E8E;
+    --accent-soft: #E8E4F4;
+    --ok:          #2E6B44;
+    --ok-bg:       #DCE9DE;
+    --warn:        #855312;
+    --warn-bg:     #F0E4CE;
+    --bad:         #9A2C2C;
+    --bad-bg:      #F2DDDB;
+
+    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --sans:  "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono:  "IBM Plex Mono", "SF Mono", Consolas, monospace;
+    --guj:   "Noto Sans Gujarati", "Shruti", sans-serif;
+
+    --measure: 68ch;
+    --shell: 1120px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:          #131714;
+      --surface:     #1A1F1B;
+      --surface-2:   #232922;
+      --ink:         #E5EAE2;
+      --ink-2:       #A5B0A6;
+      --ink-3:       #7C887E;
+      --rule:        #2E352E;
+      --rule-strong: #414A41;
+      --accent:      #AA9DF2;
+      --accent-ink:  #C0B6F7;
+      --accent-soft: #221D3A;
+      --ok:          #82C298;
+      --ok-bg:       #1B2A20;
+      --warn:        #DDAE5E;
+      --warn-bg:     #2C2415;
+      --bad:         #E08A84;
+      --bad-bg:      #2E1B1A;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg:          #131714;
+    --surface:     #1A1F1B;
+    --surface-2:   #232922;
+    --ink:         #E5EAE2;
+    --ink-2:       #A5B0A6;
+    --ink-3:       #7C887E;
+    --rule:        #2E352E;
+    --rule-strong: #414A41;
+    --accent:      #AA9DF2;
+    --accent-ink:  #C0B6F7;
+    --accent-soft: #221D3A;
+    --ok:          #82C298;
+    --ok-bg:       #1B2A20;
+    --warn:        #DDAE5E;
+    --warn-bg:     #2C2415;
+    --bad:         #E08A84;
+    --bad-bg:      #2E1B1A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 56px);
+  }
+
+  .prose { max-width: var(--measure); }
+
+  p { margin: 0 0 1em; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  .guj { font-family: var(--guj); }
+
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 1px solid var(--rule-strong);
+    padding: clamp(40px, 7vw, 76px) 0 clamp(28px, 4vw, 40px);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 22px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .eyebrow span:not(:last-child)::after {
+    content: "";
+    display: inline-block;
+    width: 1px; height: 10px;
+    background: var(--rule-strong);
+    margin-left: 12px;
+    vertical-align: -1px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(2.3rem, 6vw, 3.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.018em;
+    margin: 0 0 20px;
+    text-wrap: balance;
+    max-width: 16ch;
+  }
+
+  .standfirst {
+    font-family: var(--serif);
+    font-size: clamp(1.08rem, 2.2vw, 1.3rem);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2px;
+    margin-top: 38px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .fact { background: var(--bg); padding: 14px 16px; }
+  .fact dt {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 5px;
+  }
+  .fact dd {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- sticky rail ---------- */
+
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+  }
+  .rail-inner {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .rail a {
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-2);
+    padding: 11px 15px 10px 0;
+    margin-right: 15px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .rail a:hover { color: var(--accent-ink); border-bottom-color: var(--accent); }
+  .rail a b { color: var(--ink-3); font-weight: 500; margin-right: 6px; }
+
+  /* ---------- sections ---------- */
+
+  section { padding: clamp(44px, 6vw, 72px) 0; border-bottom: 1px solid var(--rule); }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent-ink);
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 30px 0 12px;
+  }
+
+  /* ---------- problem list ---------- */
+
+  .drivers { list-style: none; padding: 0; margin: 0; max-width: 78ch; }
+  .drivers li {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 8px 28px;
+    padding: 18px 0;
+    border-top: 1px solid var(--rule);
+    align-items: start;
+  }
+  .drivers li:last-child { border-bottom: 1px solid var(--rule); }
+  .drivers b {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    font-weight: 500;
+    padding-top: 4px;
+  }
+  .drivers p { margin: 0; color: var(--ink-2); }
+  @media (max-width: 620px) {
+    .drivers li { grid-template-columns: 1fr; gap: 4px; }
+  }
+
+  /* ---------- pull quote ---------- */
+
+  .axiom {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 26px;
+    margin: 0 0 30px;
+    max-width: 46ch;
+  }
+  .axiom p {
+    font-family: var(--serif);
+    font-size: clamp(1.3rem, 3vw, 1.65rem);
+    line-height: 1.34;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* ---------- module map diagram ---------- */
+
+  .map-wrap { overflow-x: auto; padding-bottom: 6px; margin-bottom: 34px; }
+  .map { min-width: 660px; font-family: var(--mono); }
+
+  .tier {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+    padding: 13px 16px;
+  }
+  .tier .t-num {
+    color: var(--accent-ink);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+  .tier .t-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    margin-left: 8px;
+  }
+  .tier .t-desc {
+    font-family: var(--sans);
+    color: var(--ink-2);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    margin-top: 4px;
+  }
+
+  .tier-flow { border-color: var(--accent); border-width: 1px 1px 1px 3px; }
+  .tier-base { background: var(--accent-soft); border-color: var(--rule-strong); }
+  .tier-base .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 30px; }
+  @media (max-width: 700px) { .tier-base .row2 { grid-template-columns: 1fr; } }
+
+  .link { display: flex; justify-content: center; }
+  .link i { display: block; width: 1px; height: 22px; background: var(--rule-strong); }
+
+  .fan { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 14px; }
+  .fan .stem { display: flex; justify-content: center; }
+  .fan .stem i { display: block; width: 1px; height: 22px; background: var(--rule-strong); }
+  .fan .cell {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+    padding: 12px 13px;
+    min-height: 118px;
+  }
+  .fan .cell .c-num { color: var(--accent-ink); font-weight: 600; font-size: 0.76rem; }
+  .fan .cell .c-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.84rem;
+    margin: 2px 0 8px;
+    line-height: 1.25;
+  }
+  .fan .cell .c-io {
+    font-size: 0.72rem;
+    color: var(--ink-2);
+    line-height: 1.55;
+    border-top: 1px dashed var(--rule-strong);
+    padding-top: 7px;
+  }
+
+  .steps {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+    margin-top: 7px;
+  }
+
+  .map-note {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 12px;
+  }
+
+  /* ---------- group divider ---------- */
+
+  .group {
+    padding: clamp(38px, 5vw, 56px) 0 6px;
+    border-bottom: none;
+  }
+  .group h2 {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+  .group p {
+    max-width: var(--measure);
+    color: var(--ink-2);
+    margin: 12px 0 0;
+  }
+
+  /* ---------- module blocks ---------- */
+
+  .module {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 0 32px;
+    padding: clamp(36px, 5vw, 54px) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .mod-gutter { position: relative; }
+  .mod-gutter .n {
+    font-family: var(--serif);
+    font-size: 3.4rem;
+    line-height: 0.9;
+    color: var(--rule-strong);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    position: sticky;
+    top: 62px;
+  }
+  @media (max-width: 760px) {
+    .module { grid-template-columns: 1fr; gap: 0; }
+    .mod-gutter .n { position: static; font-size: 2.2rem; margin-bottom: 6px; }
+  }
+
+  .mod-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 3.2vw, 1.95rem);
+    line-height: 1.15;
+    letter-spacing: -0.012em;
+    margin: 0 0 6px;
+  }
+  .mod-role {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-2);
+    font-size: 1.05rem;
+    margin: 0 0 4px;
+    max-width: 52ch;
+  }
+
+  .mod-body { max-width: var(--measure); }
+  .mod-body ul { margin: 0; padding-left: 1.15em; }
+  .mod-body li { margin-bottom: 0.5em; }
+  .mod-body li::marker { color: var(--rule-strong); }
+
+  .boundary {
+    margin-top: 30px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    max-width: var(--measure);
+  }
+  .boundary .b-label {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: block;
+    margin-bottom: 7px;
+  }
+  .boundary p { margin: 0; font-size: 0.97rem; color: var(--ink); }
+
+  .guard {
+    margin-top: 28px;
+    border: 1px solid var(--accent);
+    padding: 18px 20px;
+    max-width: var(--measure);
+    background: var(--accent-soft);
+  }
+  .guard .b-label {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: block;
+    margin-bottom: 7px;
+  }
+  .guard p:last-child { margin-bottom: 0; }
+
+  /* ---------- tables ---------- */
+
+  .tbl-wrap { overflow-x: auto; margin: 6px 0 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 560px;
+    font-size: 0.93rem;
+  }
+  caption {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-bottom: 10px;
+  }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 11px 18px 11px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 1px solid var(--rule-strong); }
+  td:last-child, th:last-child { padding-right: 0; }
+  .t-edit { color: var(--ink); font-weight: 500; }
+  .t-safe { color: var(--ink-3); }
+  .t-mono { font-family: var(--mono); font-size: 0.86rem; }
+
+  /* rule anatomy */
+  .anatomy td:first-child {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-2);
+    white-space: nowrap;
+    width: 210px;
+  }
+  .anatomy td:last-child { font-weight: 500; }
+
+  /* ---------- status chips ---------- */
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    white-space: nowrap;
+    border-radius: 2px;
+  }
+  .chip.ok   { background: var(--ok-bg);   color: var(--ok); }
+  .chip.part { background: var(--warn-bg); color: var(--warn); }
+  .chip.gap  { background: var(--bad-bg);  color: var(--bad); }
+
+  .status-tbl td:first-child { width: 190px; font-weight: 500; }
+  .status-tbl td:nth-child(2) { width: 130px; }
+
+  /* ---------- next steps ---------- */
+
+  .next { list-style: none; counter-reset: n; padding: 0; margin: 34px 0 0; max-width: 80ch; }
+  .next li {
+    counter-increment: n;
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .next li:last-child { border-bottom: 1px solid var(--rule); }
+  .next li::before {
+    content: counter(n);
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: var(--accent-ink);
+    line-height: 1.1;
+  }
+  .next b { display: block; font-weight: 600; margin-bottom: 2px; }
+  .next span { color: var(--ink-2); font-size: 0.95rem; }
+
+  /* ---------- adjacent ---------- */
+
+  .adjacent { list-style: none; padding: 0; margin: 0; max-width: 80ch; }
+  .adjacent li { padding: 16px 0; border-top: 1px solid var(--rule); }
+  .adjacent li:last-child { border-bottom: 1px solid var(--rule); }
+  .adjacent b { font-family: var(--sans); font-weight: 600; }
+  .adjacent .gj { font-family: var(--guj); color: var(--ink-2); font-weight: 400; }
+
+  /* ---------- closing ---------- */
+
+  .closing { border-bottom: none; }
+  .thesis {
+    font-family: var(--serif);
+    font-size: clamp(1.35rem, 3.4vw, 1.85rem);
+    line-height: 1.32;
+    max-width: 34ch;
+    margin: 40px 0 0;
+    text-wrap: balance;
+  }
+  .thesis em { color: var(--accent-ink); font-style: normal; }
+
+  footer {
+    padding: 30px 0 60px;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<header class="masthead">
+  <div class="shell">
+    <div class="eyebrow">
+      <span>TitleClear</span><span>Architecture note</span><span>September 2026</span>
+    </div>
+    <h1>How TitleClear is split up</h1>
+    <p class="standfirst">
+      Eight modules with walls between them, so that a change to a law, a language,
+      a state or a model touches one module and leaves the rest alone.
+    </p>
+    <dl class="facts">
+      <div class="fact"><dt>Modules</dt><dd>8 &mdash; 4 engines, 4 supports</dd></div>
+      <div class="fact"><dt>Live today</dt><dd>Gujarat</dd></div>
+      <div class="fact"><dt>Languages read</dt><dd>Gujarati, English</dd></div>
+      <div class="fact"><dt>Pipeline steps</dt><dd>7</dd></div>
+    </dl>
+  </div>
+</header>
+
+<nav class="rail" aria-label="Modules">
+  <div class="shell rail-inner">
+    <a href="#problem">Why</a>
+    <a href="#map">Map</a>
+    <a href="#m1"><b>1</b>Flow</a>
+    <a href="#m2"><b>2</b>Rules</a>
+    <a href="#m3"><b>3</b>OCR</a>
+    <a href="#m4"><b>4</b>ML</a>
+    <a href="#m5"><b>5</b>Contracts</a>
+    <a href="#m6"><b>6</b>State packs</a>
+    <a href="#m7"><b>7</b>Connectors</a>
+    <a href="#m8"><b>8</b>App shell</a>
+    <a href="#change">Change impact</a>
+    <a href="#status">Status</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- 1. PROBLEM -->
+  <section id="problem">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">01</span>
+        <h2>The problem we are designing for</h2>
+      </div>
+      <div class="prose">
+        <p>TitleClear sits on top of rules that keep moving. Four things will change
+        under us, repeatedly, for as long as the product exists.</p>
+      </div>
+      <ul class="drivers">
+        <li>
+          <b>Laws change</b>
+          <p>Stamp duty rates, required documents, and what counts as a red flag are
+          revised by the government regularly. Users must be able to change these
+          themselves &mdash; without a developer and without a new release.</p>
+        </li>
+        <li>
+          <b>States get added</b>
+          <p>Gujarat today. Maharashtra, Rajasthan and others later. Each state has
+          different documents, different words for the same thing, and different rules.</p>
+        </li>
+        <li>
+          <b>Languages get added</b>
+          <p>English and Gujarati today. Hindi, Marathi and others later.</p>
+        </li>
+        <li>
+          <b>Models improve</b>
+          <p>Better AI models arrive every few months. We should be able to swap one in
+          without rewriting the product.</p>
+        </li>
+      </ul>
+      <div class="prose" style="margin-top:26px">
+        <p>If everything is written in one place, every one of these changes is a risk.
+        So we split the system into modules with clear walls between them.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. THE RULE -->
+  <section id="rule">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <h2>The single rule that makes this work</h2>
+      </div>
+      <blockquote class="axiom">
+        <p>Modules never reach inside each other. They only pass agreed data shapes
+        between them.</p>
+      </blockquote>
+      <div class="prose">
+        <p>Think of it like a factory line. Each station is handed a tray, does its one
+        job, and passes the tray on. A station can be replaced with a better one
+        overnight &mdash; as long as the new station accepts the same tray and returns
+        the same tray.</p>
+        <p>In our system the tray is a fixed list of fields: owner name, survey number
+        (<span class="t-mono">1234/2</span>), village, area, dates, document type. That
+        list is Module 5.</p>
+        <p>Two practical consequences: we can replace the OCR engine without touching
+        the rules, and we can let a user write a hundred new rules without touching the AI.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. MAP -->
+  <section id="map">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <h2>Module map</h2>
+      </div>
+      <div class="prose" style="margin-bottom:30px">
+        <p>Eight modules: the <strong>four engines</strong> that do the work, and the
+        <strong>four supporting modules</strong> that keep those engines independent
+        of one another.</p>
+      </div>
+
+      <div class="map-wrap">
+        <div class="map" role="img" aria-label="Layered module map. Top layer: App Shell. Below it, the Flow Engine, which runs the seven pipeline steps. Below that, four modules side by side: OCR Engine turning pictures into text, ML Engine turning text into facts, Rules Engine turning facts into risk, and Connectors bringing in outside data. At the base, two shared layers: Shared Data Contracts and State Packs.">
+
+          <div class="tier">
+            <span class="t-num">08</span><span class="t-name">APP SHELL</span>
+            <div class="t-desc">Screens, login, file uploads, and the report the customer reads</div>
+          </div>
+
+          <div class="link"><i></i></div>
+
+          <div class="tier tier-flow">
+            <span class="t-num">01</span><span class="t-name">FLOW ENGINE</span>
+            <div class="t-desc">Decides what runs and in what order. Saves progress. Handles failures and retries.</div>
+            <div class="steps">intake &rarr; read &rarr; understand &rarr; classify &rarr; cross-check &rarr; score &rarr; report</div>
+          </div>
+
+          <div class="fan">
+            <div class="stem"><i></i></div>
+            <div class="stem"><i></i></div>
+            <div class="stem"><i></i></div>
+            <div class="stem"><i></i></div>
+
+            <div class="cell">
+              <div class="c-num">03</div>
+              <div class="c-name">OCR ENGINE</div>
+              <div class="c-io">picture<br>&rarr; text</div>
+            </div>
+            <div class="cell">
+              <div class="c-num">04</div>
+              <div class="c-name">ML ENGINE</div>
+              <div class="c-io">text<br>&rarr; facts</div>
+            </div>
+            <div class="cell">
+              <div class="c-num">02</div>
+              <div class="c-name">RULES ENGINE</div>
+              <div class="c-io">facts<br>&rarr; risk &amp; score</div>
+            </div>
+            <div class="cell">
+              <div class="c-num">07</div>
+              <div class="c-name">CONNECTORS</div>
+              <div class="c-io">outside data<br>&rarr; facts</div>
+            </div>
+
+            <div class="stem"><i></i></div>
+            <div class="stem"><i></i></div>
+            <div class="stem"><i></i></div>
+            <div class="stem"><i></i></div>
+          </div>
+
+          <div class="tier tier-base">
+            <div class="row2">
+              <div>
+                <span class="t-num">05</span><span class="t-name">SHARED DATA CONTRACTS</span>
+                <div class="t-desc">The common language all modules speak</div>
+              </div>
+              <div>
+                <span class="t-num">06</span><span class="t-name">STATE PACKS</span>
+                <div class="t-desc">One rulebook folder per state</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <p class="map-note">Everything above the base layer depends downward only &mdash; never sideways.</p>
+
+      <h3>Why four supports and not just the four engines</h3>
+      <div class="prose">
+        <ul>
+          <li>The four engines still need a <strong>common language</strong> to talk in,
+          or they end up reaching into each other again &mdash; Module 5.</li>
+          <li>State-specific facts (documents, labels, rates, rules) would otherwise get
+          scattered across all four engines &mdash; Module 6.</li>
+          <li>Fetching data from government portals is a different kind of work with
+          different failure modes &mdash; sites go down, captchas appear &mdash; and must
+          not be tangled into the pipeline &mdash; Module 7.</li>
+          <li>Screens and login are not engine work and change for completely different
+          reasons &mdash; Module 8.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENGINES GROUP -->
+  <div class="shell group">
+    <h2>The four engines</h2>
+    <p>Each one does a single job and hands the result on. None of them knows how the
+    others work.</p>
+  </div>
+
+  <!-- MODULE 1 -->
+  <article class="module shell" id="m1">
+    <div class="mod-gutter"><div class="n">01</div></div>
+    <div>
+      <h2 class="mod-title">Flow Engine</h2>
+      <p class="mod-role">The manager. It does no real work itself; it decides who works, in what order.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Runs a verification from start to finish as a fixed sequence of steps.</li>
+          <li>Passes the output of each step as the input of the next.</li>
+          <li>Saves the state after every single step, so a crash never loses a whole run.</li>
+          <li>Reports live progress to the user &mdash; &ldquo;reading document 3 of 7&rdquo;.</li>
+          <li>Handles failure honestly: if one step fails it records which step, why, and
+          what the user can do about it. It does not fail the whole run silently.</li>
+          <li>Lets steps be added, removed or reordered without any step knowing about it.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers</h3>
+      <div class="mod-body">
+        <ul>
+          <li>The step sequence: <strong>intake &rarr; read &rarr; understand &rarr;
+          classify &rarr; cross-check &rarr; score &rarr; assemble report.</strong></li>
+          <li>Turning uploaded files into readable pages &mdash; PDF pages into images,
+          Word files into text.</li>
+          <li>Run records: what was uploaded, what each step produced, how long it took,
+          what failed.</li>
+          <li>Restarting a stalled or failed run.</li>
+          <li>Which engine and rulebook version were used for a run, so an old report can
+          always be explained.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Today the process has seven steps. Tomorrow it may have ten &mdash; a fraud
+          check, a map-boundary check, an advocate review step. Without a manager, adding
+          a step means editing every other step.</li>
+          <li>Verification takes minutes, not seconds. Something must track progress,
+          survive restarts, and let the user return to a half-finished run.</li>
+          <li>It is the only module that knows the <em>order</em> of things. Everyone else
+          just does their one job. That is what keeps the other modules replaceable.</li>
+        </ul>
+      </div>
+
+      <div class="boundary">
+        <span class="b-label">Boundary &mdash; must not do</span>
+        <p>It must not know Gujarati. It must not know what a 7/12 extract is. It must not
+        know that a missing NA order is bad. The moment the flow engine contains a fact
+        about land law, the design has failed.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 2 -->
+  <article class="module shell" id="m2">
+    <div class="mod-gutter"><div class="n">02</div></div>
+    <div>
+      <h2 class="mod-title">Rules Engine</h2>
+      <p class="mod-role">The rulebook. This is the module our users will actually customise.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Holds every rule that decides whether something about a property is fine,
+          questionable, or a problem.</li>
+          <li>Runs those rules against the facts gathered from the documents.</li>
+          <li>Produces three things: <strong>flags</strong> (real problems),
+          <strong>review items</strong> (uncertain, needs a human look), and a
+          <strong>score out of 100</strong>.</li>
+          <li>Explains every result in plain language, plus what the user should do next.</li>
+          <li>Lets a non-developer create, edit, switch off and test rules through a
+          screen &mdash; not by editing code.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers &mdash; a. rules as filled-in forms, not code</h3>
+      <div class="tbl-wrap">
+        <table class="anatomy">
+          <caption>Every rule has the same seven parts</caption>
+          <tbody>
+            <tr><td>What it looks at</td><td>Survey number on the 7/12 vs on the sale deed</td></tr>
+            <tr><td>The condition</td><td>They do not match</td></tr>
+            <tr><td>How serious</td><td>High</td></tr>
+            <tr><td>Which category</td><td>Consistency</td></tr>
+            <tr><td>Points lost</td><td class="t-mono">20</td></tr>
+            <tr><td>What we tell the user</td><td>&ldquo;The survey number differs between two documents.&rdquo;</td></tr>
+            <tr><td>What to do next</td><td>&ldquo;Get the mismatch corrected before proceeding.&rdquo;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mod-body" style="margin-top:16px">
+        <p>Because a rule is a form and not a program, a user cannot write a rule that
+        crashes the system.</p>
+      </div>
+
+      <h3>b. rulebooks with dates</h3>
+      <div class="mod-body">
+        <p>Rules are grouped into a <strong>rulebook</strong> that belongs to one state and
+        has a start date. When a law changes on 1 April, we publish a new rulebook version
+        starting 1 April. Old reports keep the rulebook they were scored with, so
+        re-opening a year-old report shows the same result it showed then.</p>
+      </div>
+
+      <h3>c. a safe editing loop</h3>
+      <div class="mod-body">
+        <p>Draft &rarr; run it against sample cases &rarr; see exactly what changes &rarr;
+        publish. A user always sees the effect of a rule before it goes live, and can roll
+        back.</p>
+      </div>
+
+      <h3>d. the score policy as data</h3>
+      <div class="mod-body">
+        <p>Category weights, penalty points and thresholds sit in one place as plain
+        numbers. Recalibrating the score never means touching logic.</p>
+      </div>
+
+      <h3>e. the rule catalogue</h3>
+      <div class="mod-body">
+        <p>Missing documents, mismatched details, broken ownership chain, mortgage or loan
+        signs, tax dues, court cases, poor scan quality.</p>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li><strong>This is the part that changes most often.</strong> Rules change with
+          every government circular. If a rule change needs a developer and a release, the
+          product is permanently out of date.</li>
+          <li>Each state has a different rulebook. Separating rules from everything else is
+          what makes adding a state a data job rather than a rewrite.</li>
+          <li>A regulator, a lawyer or a mentor will ask <em>&ldquo;why did this property
+          score 62?&rdquo;</em> Because rules are data with plain-language text attached, we
+          can print the exact list of rules that fired and the points each one took away.</li>
+        </ul>
+      </div>
+
+      <div class="guard">
+        <span class="b-label">The guard rail that makes this safe</span>
+        <p>A user-written rule can only ask about fields that Module 5 guarantees exist. The
+        rule editor offers a dropdown of available fields &mdash; not a free text box. So a
+        user can write a <em>wrong</em> rule, but never a <em>broken</em> one. This is the
+        single most important protection in the whole design.</p>
+      </div>
+
+      <div class="boundary">
+        <span class="b-label">Boundary &mdash; must not do</span>
+        <p>It must never read a file, call an AI model, or fetch a web page. It receives
+        facts and returns judgements. Nothing else.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 3 -->
+  <article class="module shell" id="m3">
+    <div class="mod-gutter"><div class="n">03</div></div>
+    <div>
+      <h2 class="mod-title">OCR Engine</h2>
+      <p class="mod-role">The reader. Turns a picture of a document into text.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Takes an image or a scanned page and returns the text on it, plus a
+          confidence figure for how sure it is.</li>
+          <li>Supports several reading engines behind one common interface, chosen by
+          configuration &mdash; not by changing code.</li>
+          <li>Supports several languages as <strong>plug-in language packs</strong>.</li>
+          <li>Reports honestly when it is unsure, so a bad scan becomes &ldquo;needs a human
+          look&rdquo; rather than confident nonsense.</li>
+          <li>Measures its own accuracy against a set of test documents, so we can prove a
+          new engine is actually better before switching to it.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers</h3>
+      <div class="mod-body">
+        <ul>
+          <li><strong>Engines:</strong> a local offline engine (Tesseract &mdash; works with
+          no internet and no API key), a cloud engine (Google Vision &mdash; much better on
+          real scans and handwriting), and prepared slots for future engines including
+          vision AI models.</li>
+          <li><strong>Language packs:</strong> English and Gujarati today. A new language
+          means adding a pack &mdash; its script, its trained data, and how confident we are
+          in it. Nothing outside this module changes.</li>
+          <li><strong>Quality measurement:</strong> a generator that creates realistic
+          sample documents with known correct answers, and a scorer that reports character
+          error rate and field accuracy per language.</li>
+          <li><strong>The hard case, handwriting.</strong> Handwritten Gujarati is genuinely
+          difficult &mdash; roughly 55&ndash;70% accuracy at best, against 95%+ for printed
+          text. This module owns that problem and is where the research into better
+          handwriting models is kept.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Adding a language must never be a product-wide change. Adding Marathi should
+          touch this module and one state pack &mdash; nothing else.</li>
+          <li>OCR quality is the single biggest driver of whether the final report is any
+          good. It deserves its own accuracy tests, separate from everything else.</li>
+          <li>The best OCR technology in this space changes every few months. We must be
+          able to swap engines with no risk to the rest of the product.</li>
+        </ul>
+      </div>
+
+      <div class="boundary">
+        <span class="b-label">Boundary &mdash; must not do</span>
+        <p>It must not try to understand what the text means. It returns text and a
+        confidence number. Deciding that <span class="t-mono">1234/2</span> is a survey
+        number is Module 4&rsquo;s job.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 4 -->
+  <article class="module shell" id="m4">
+    <div class="mod-gutter"><div class="n">04</div></div>
+    <div>
+      <h2 class="mod-title">ML Engine</h2>
+      <p class="mod-role">The interpreter. Turns loose text into organised facts.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Reads the raw text from Module 3 and pulls out the fields we care about:
+          owner name, survey number, village, district, area, khata number, dates, document
+          type, mortgage mentions.</li>
+          <li>Decides what type of document each upload actually is, and whether that
+          matches what the user said it was.</li>
+          <li>Compares the same field across several documents and decides whether they
+          agree &mdash; allowing for spelling variants, Gujarati vs English spellings,
+          different date formats and different area units.</li>
+          <li>Gives a confidence level with every fact, so uncertain results go to human
+          review instead of being treated as truth.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers</h3>
+      <div class="mod-body">
+        <ul>
+          <li><strong>Field extraction:</strong> a rule-based extractor that works offline,
+          and an AI-based extractor that handles messy real-world text. Selected by
+          configuration.</li>
+          <li><strong>Document classification:</strong> deciding whether an upload really is
+          a 7/12 extract <span class="guj">(સાત-બાર)</span>, an Index-2, a sale deed, and so on.</li>
+          <li><strong>Matching and reconciliation</strong> &mdash; the hardest and most
+          valuable part. Deciding that <span class="guj">રમેશભાઈ પટેલ</span>,
+          &ldquo;Rameshbhai Patel&rdquo; and &ldquo;R. Patel&rdquo; are the same person
+          &mdash; or that they are not.</li>
+          <li><strong>Normalisation:</strong> converting units (guntha, hectare, square
+          metre), date formats and name spellings into one comparable form.</li>
+          <li><strong>An honest vocabulary:</strong> every comparison returns one of four
+          answers &mdash; <span class="t-mono">match</span>,
+          <span class="t-mono">related</span>, <span class="t-mono">mismatch</span> or
+          <span class="t-mono">missing</span>. &ldquo;Related&rdquo; means close but not
+          identical, and it becomes a review item, never an accusation. This is what stops
+          the product from confidently telling a customer their title is defective because
+          of a spelling difference.</li>
+          <li><strong>Future scope:</strong> fraud pattern detection, ownership-chain
+          reconstruction, learning from advocate corrections.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>This is where AI belongs, and it must be contained. If AI calls were sprinkled
+          through the pipeline and the rules, we could never test, price or replace them.</li>
+          <li>It is the part most likely to be replaced by something better. Isolating it
+          means a model upgrade is a configuration change, not a project.</li>
+          <li>It is also the part most likely to be <em>wrong</em>. Keeping it behind one
+          wall means there is exactly one place where confidence is judged and uncertainty
+          is handled.</li>
+        </ul>
+      </div>
+
+      <div class="boundary">
+        <span class="b-label">Boundary &mdash; must not do</span>
+        <p>It must not decide whether something is <em>bad</em>. Finding that two survey
+        numbers differ is Module 4&rsquo;s job. Deciding that this is a high-severity
+        problem worth 20 points is Module 2&rsquo;s job.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- SUPPORTS GROUP -->
+  <div class="shell group">
+    <h2>The four supporting modules</h2>
+    <p>These carry no product logic of their own. They exist so the four engines never
+    have to know about each other.</p>
+  </div>
+
+  <!-- MODULE 5 -->
+  <article class="module shell" id="m5">
+    <div class="mod-gutter"><div class="n">05</div></div>
+    <div>
+      <h2 class="mod-title">Shared Data Contracts</h2>
+      <p class="mod-role">The dictionary. The common language every module speaks.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Defines, in one place, the exact shape of every piece of information that
+          moves between modules.</li>
+          <li>Defines the document type list &mdash; every kind of land document we
+          recognise, with its Gujarati and English names.</li>
+          <li>Defines the vocabulary for results: severity levels, match verdicts, score
+          bands, category names.</li>
+          <li>Ensures every user-visible piece of text carries both a Gujarati and an
+          English version, so nothing gets stuck in one language.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Property, Owner, Document, Extracted Fields, Flag, Review Item, Score, Report.</li>
+          <li>The document type list, and which fields each type is expected to contain.</li>
+          <li>The bilingual text format used everywhere.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>This is the actual mechanism that makes the modules independent. Modules do
+          not depend on each other &mdash; they all depend on this one small, slow-changing
+          dictionary.</li>
+          <li>It is what makes the rules engine safe to open up to users: the rule editor
+          can only offer fields that exist here.</li>
+          <li>It is deliberately the <strong>smallest and most stable</strong> module. If it
+          changes weekly, the design is wrong.</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 6 -->
+  <article class="module shell" id="m6">
+    <div class="mod-gutter"><div class="n">06</div></div>
+    <div>
+      <h2 class="mod-title">State Packs</h2>
+      <p class="mod-role">One folder per state. Everything Gujarat-specific lives inside it.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <p>Bundles everything that is true about one state into a single self-contained
+        package, so adding a state means adding a folder.</p>
+      </div>
+
+      <h3>What it covers &mdash; one pack per state, containing</h3>
+      <div class="mod-body">
+        <ul>
+          <li><strong>Form settings</strong> &mdash; district and taluka lists, and the local
+          words for things (&ldquo;Taluka&rdquo; in Gujarat, &ldquo;Tehsil&rdquo; elsewhere;
+          &ldquo;Khata&rdquo; vs &ldquo;Patta&rdquo;).</li>
+          <li><strong>Document requirements</strong> &mdash; which documents are needed for
+          which land type (agricultural, non-agricultural, urban plot, flat) and which are
+          optional.</li>
+          <li><strong>The default rulebook</strong> &mdash; the state&rsquo;s starting set of
+          rules, which users then customise.</li>
+          <li><strong>Local terms</strong> &mdash; the words that appear on that
+          state&rsquo;s documents, in that state&rsquo;s language, used by the classifier and
+          the matcher.</li>
+          <li><strong>Rates and reference data</strong> &mdash; jantri / ASR land rates,
+          stamp duty, and the government notification each number came from, with the date
+          it took effect.</li>
+          <li><strong>Which languages to read</strong> &mdash; Gujarat means Gujarati +
+          English; Maharashtra would mean Marathi + English.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Today &ldquo;Gujarat&rdquo; is spread across the form config, the requirements
+          table, the document keywords, the rate data and the scoring policy. Adding a second
+          state in that shape means editing five places and hoping nothing breaks.</li>
+          <li>With state packs, adding Maharashtra is: create a folder, fill in the same
+          shape, register it. The four engines are not touched, not rebuilt, not retested.</li>
+          <li>It also gives a clean answer to &ldquo;where did this number come from?&rdquo;
+          &mdash; every rate and requirement carries its source notification and effective
+          date.</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 7 -->
+  <article class="module shell" id="m7">
+    <div class="mod-gutter"><div class="n">07</div></div>
+    <div>
+      <h2 class="mod-title">Connectors</h2>
+      <p class="mod-role">The outside world. Fetching data we do not have.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Fetches records from external sources behind one common interface, so the rest
+          of the system does not care whether data came from a live portal, a cached copy or
+          a stub.</li>
+          <li>Handles the messy realities of external systems: rate limits, retries, caching,
+          outages.</li>
+          <li>Stops cleanly and says &ldquo;this needs manual handling&rdquo; when it hits a
+          captcha or a login wall, rather than trying to work around it.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Sources: land records, registration and encumbrance, RERA, property tax, court
+          cases, maps. GujRERA is live today &mdash; read-only public search, behind a
+          feature flag &mdash; and the rest are stubs behind the same interface.</li>
+          <li>Caching and polite request pacing.</li>
+          <li>Turning each source&rsquo;s own format into the shared shapes from Module 5.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Government portals are unreliable and change without notice. That instability
+          must be contained in one module and never leak into the pipeline.</li>
+          <li>Every source has its own legal and access constraints. Keeping them separate
+          lets each be switched on or off independently as approvals come through.</li>
+          <li>The rest of the system already works against these interfaces using mock data,
+          so a real connector can be switched on with no other change.</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 8 -->
+  <article class="module shell" id="m8">
+    <div class="mod-gutter"><div class="n">08</div></div>
+    <div>
+      <h2 class="mod-title">App Shell</h2>
+      <p class="mod-role">Everything the customer sees and touches.</p>
+
+      <h3>What it does</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Provides the screens: property entry, document upload, live progress, final
+          report.</li>
+          <li>Handles accounts and login, so uploaded documents belong to someone.</li>
+          <li>Stores uploaded files safely and serves them back for viewing.</li>
+          <li>Presents the report: score, flagged issues, ownership timeline, document
+          checklist, next steps, and the disclaimer that this is a preliminary check and not
+          a legal title certificate.</li>
+        </ul>
+      </div>
+
+      <h3>What it covers</h3>
+      <div class="mod-body">
+        <ul>
+          <li>All screens, in both Gujarati and English.</li>
+          <li>Sign-up, login, sessions, and the rule that documents are private to their
+          owner.</li>
+          <li>File storage &mdash; currently a plain folder structure, so moving to cloud
+          storage later changes one file.</li>
+          <li>Report rendering and download.</li>
+        </ul>
+      </div>
+
+      <h3>Why we need it</h3>
+      <div class="mod-body">
+        <ul>
+          <li>Screens change for completely different reasons than engines do &mdash; design
+          feedback, not law changes. Mixing the two means every design tweak risks the
+          scoring logic.</li>
+          <li>Uploaded documents are people&rsquo;s private legal papers. Ownership and
+          access control need to live in one clearly identified place.</li>
+          <li>Keeping presentation separate means the same engines can later serve a mobile
+          app, a partner API or a bulk tool with no engine changes.</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- CHANGE IMPACT -->
+  <section id="change">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2>How a change flows through the system</h2>
+      </div>
+      <div class="prose" style="margin-bottom:26px">
+        <p>This table is the real test of the design. For each kind of change, only the
+        named module should need editing.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">When this changes</th>
+              <th scope="col">We edit</th>
+              <th scope="col">We do not touch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>A penalty weight or score threshold</td><td class="t-edit">Rules Engine &mdash; numbers only</td><td class="t-safe">Everything else</td></tr>
+            <tr><td>A new required document in Gujarat</td><td class="t-edit">Gujarat State Pack</td><td class="t-safe">All four engines</td></tr>
+            <tr><td>A new rule, written by a user</td><td class="t-edit">Rules Engine, via the editor</td><td class="t-safe">All code</td></tr>
+            <tr><td>A stamp duty or jantri rate revision</td><td class="t-edit">Gujarat State Pack</td><td class="t-safe">All four engines</td></tr>
+            <tr><td>Support Marathi documents</td><td class="t-edit">OCR Engine &mdash; new language pack</td><td class="t-safe">Rules, ML, Flow</td></tr>
+            <tr><td>A better handwriting model appears</td><td class="t-edit">OCR Engine &mdash; new engine option</td><td class="t-safe">Everything else</td></tr>
+            <tr><td>A better field-extraction AI appears</td><td class="t-edit">ML Engine &mdash; swap the extractor</td><td class="t-safe">Everything else</td></tr>
+            <tr><td>Add Maharashtra</td><td class="t-edit">New State Pack, plus its connectors</td><td class="t-safe">All four engines</td></tr>
+            <tr><td>Add a new step, e.g. a fraud check</td><td class="t-edit">Flow Engine, plus one new step</td><td class="t-safe">Existing steps</td></tr>
+            <tr><td>A government portal becomes available</td><td class="t-edit">Connectors &mdash; one new connector</td><td class="t-safe">Everything else</td></tr>
+            <tr><td>Redesign the report screen</td><td class="t-edit">App Shell</td><td class="t-safe">All four engines</td></tr>
+            <tr><td>Add a brand-new fact we extract</td><td class="t-edit">Contracts, then ML, then Rules</td><td class="t-safe">OCR, Flow, Connectors</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose" style="margin-top:24px">
+        <p>The last row is the only change that crosses several modules &mdash; because
+        adding a new <em>kind of fact</em> genuinely changes the shared language. That is
+        expected and rare, and it is the reason Module 5 is kept deliberately small.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section id="status">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">05</span>
+        <h2>Where we are today</h2>
+      </div>
+      <div class="tbl-wrap">
+        <table class="status-tbl">
+          <thead>
+            <tr>
+              <th scope="col">Module</th>
+              <th scope="col">Status</th>
+              <th scope="col">Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1 &nbsp;Flow Engine</td>
+              <td><span class="chip ok">Built</span></td>
+              <td>Seven steps, progress saved after each one, restart on stall, tested end to end.</td>
+            </tr>
+            <tr>
+              <td>2 &nbsp;Rules Engine</td>
+              <td><span class="chip gap">Half built</span></td>
+              <td>Rules run and score correctly, and the numbers are already separated out as data. <strong>Not yet user-editable</strong> &mdash; no editor screen, no rulebook versions, no effective dates. This is the biggest remaining gap.</td>
+            </tr>
+            <tr>
+              <td>3 &nbsp;OCR Engine</td>
+              <td><span class="chip ok">Built</span></td>
+              <td>Two working engines behind one interface, two languages, plus a sample-document generator and an accuracy scorer. Handwriting is the known weak point.</td>
+            </tr>
+            <tr>
+              <td>4 &nbsp;ML Engine</td>
+              <td><span class="chip part">Scattered</span></td>
+              <td>Extraction, classification and matching all work and are each individually swappable, but they currently live in two different folders. They should sit in one module.</td>
+            </tr>
+            <tr>
+              <td>5 &nbsp;Contracts</td>
+              <td><span class="chip ok">Built</span></td>
+              <td>Shared shapes, document taxonomy and bilingual text are all in place.</td>
+            </tr>
+            <tr>
+              <td>6 &nbsp;State Packs</td>
+              <td><span class="chip part">Scattered</span></td>
+              <td>All the Gujarat detail is written as data rather than hardcoded, which is right &mdash; but it sits in five places instead of one pack. Consolidating it is the prerequisite for adding a second state.</td>
+            </tr>
+            <tr>
+              <td>7 &nbsp;Connectors</td>
+              <td><span class="chip part">One real</span></td>
+              <td>Interface built. GujRERA works; the rest are mocks behind the same interface.</td>
+            </tr>
+            <tr>
+              <td>8 &nbsp;App Shell</td>
+              <td><span class="chip ok">Built</span></td>
+              <td>Screens, login, document library, report rendering.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The three things to do next, in order</h3>
+      <ol class="next">
+        <li>
+          <div>
+            <b>Consolidate the Gujarat state pack into one folder</b>
+            <span>Cheap to do now, expensive to do once a second state exists.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Group the ML engine into one module</b>
+            <span>So extraction, classification and matching sit together.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Make rules user-editable</b>
+            <span>Rulebook storage, versions with effective dates, an editing screen, and
+            test-before-publish. This is the feature that makes the whole product
+            customisable, and it is what the rest of the architecture was arranged to
+            support.</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ADJACENT -->
+  <section id="adjacent">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">06</span>
+        <h2>Two other features that reuse the same foundations</h2>
+      </div>
+      <div class="prose" style="margin-bottom:20px">
+        <p>Separate product areas, not part of the verification pipeline &mdash; but they sit
+        on the same contracts and the same state packs.</p>
+      </div>
+      <ul class="adjacent">
+        <li>
+          <b>Jantri rate lookup</b> &mdash; government land rate lookup by area and category.
+          Feeds the state packs&rsquo; rate data, and can later feed valuation rules.
+        </li>
+        <li>
+          <b>Document drafter</b> <span class="gj">(દસ્તાવેજ ડ્રાફ્ટ)</span> &mdash; generates
+          Gujarat property document drafts (banakhat, sale deed, rent agreement, power of
+          attorney and others) from a form. Uses the same bilingual text format and the same
+          document type list.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="summary" class="closing">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-num">07</span>
+        <h2>Summary</h2>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <caption>Eight modules &mdash; four engines and four supports</caption>
+          <thead>
+            <tr>
+              <th scope="col" style="width:52px">#</th>
+              <th scope="col" style="width:190px">Module</th>
+              <th scope="col">One line</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="t-mono">1</td><td class="t-edit">Flow Engine</td><td>Runs the steps in order and never loses a run</td></tr>
+            <tr><td class="t-mono">2</td><td class="t-edit">Rules Engine</td><td>Holds the rules users can change, and produces the score</td></tr>
+            <tr><td class="t-mono">3</td><td class="t-edit">OCR Engine</td><td>Turns pictures into text, one plug-in per language</td></tr>
+            <tr><td class="t-mono">4</td><td class="t-edit">ML Engine</td><td>Turns text into organised, comparable facts</td></tr>
+            <tr><td class="t-mono">5</td><td class="t-edit">Contracts</td><td>The common language that keeps the modules apart</td></tr>
+            <tr><td class="t-mono">6</td><td class="t-edit">State Packs</td><td>One folder per state, holding everything local</td></tr>
+            <tr><td class="t-mono">7</td><td class="t-edit">Connectors</td><td>Fetches outside data without destabilising the pipeline</td></tr>
+            <tr><td class="t-mono">8</td><td class="t-edit">App Shell</td><td>Screens, accounts, storage and the report</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="thesis">The design goal in one sentence: <em>a law changes, we edit one file
+      in one state pack, and nothing else needs to be retested.</em></p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="shell" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%">
+    <span>TitleClear &mdash; architecture note</span>
+    <span>Gujarat first, built to add states</span>
+  </div>
+</footer>
